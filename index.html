@@ -15,17 +15,37 @@
       text-align: center;
     }
 
+    h1 {
+      margin-bottom: 8px;
+    }
+
     .teams {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
 
-    input {
+    input[type="text"] {
       font-size: 18px;
       padding: 8px;
       width: 100%;
       text-align: center;
+      margin-bottom: 6px;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .teamBox {
+      padding: 12px;
+      border-radius: 18px;
+      border: 6px solid transparent;
+      background: #1c1c1c;
     }
 
     .score {
@@ -55,23 +75,31 @@
     }
   </style>
 </head>
-<body>
 
+<body>
   <h1>🏀 Score</h1>
 
   <div class="teams">
-    <div>
-      <input id="teamAName" placeholder="Team A" />
+    <!-- TEAM A -->
+    <div id="teamABox" class="teamBox">
+      <input id="teamAName" type="text" placeholder="Team A" />
+      <input id="teamAColor" type="color" value="#2ecc71" />
+
       <div class="score" id="scoreA">0</div>
+
       <button onclick="add('A',1)">+1</button>
       <button onclick="add('A',2)">+2</button>
       <button onclick="add('A',3)">+3</button>
       <button class="minus" onclick="add('A',-1)">−1</button>
     </div>
 
-    <div>
-      <input id="teamBName" placeholder="Team B" />
+    <!-- TEAM B -->
+    <div id="teamBBox" class="teamBox">
+      <input id="teamBName" type="text" placeholder="Team B" />
+      <input id="teamBColor" type="color" value="#3498db" />
+
       <div class="score" id="scoreB">0</div>
+
       <button onclick="add('B',1)">+1</button>
       <button onclick="add('B',2)">+2</button>
       <button onclick="add('B',3)">+3</button>
@@ -103,7 +131,41 @@
       document.getElementById('scoreA').innerText = 0;
       document.getElementById('scoreB').innerText = 0;
     }
-  </script>
 
+    function applyColors() {
+      const aColor = document.getElementById('teamAColor').value;
+      const bColor = document.getElementById('teamBColor').value;
+
+      document.getElementById('teamABox').style.borderColor = aColor;
+      document.getElementById('teamBBox').style.borderColor = bColor;
+    }
+
+    function saveColors() {
+      localStorage.setItem('teamAColor', document.getElementById('teamAColor').value);
+      localStorage.setItem('teamBColor', document.getElementById('teamBColor').value);
+    }
+
+    function loadColors() {
+      const a = localStorage.getItem('teamAColor');
+      const b = localStorage.getItem('teamBColor');
+
+      if (a) document.getElementById('teamAColor').value = a;
+      if (b) document.getElementById('teamBColor').value = b;
+
+      applyColors();
+    }
+
+    document.getElementById('teamAColor').addEventListener('change', () => {
+      applyColors();
+      saveColors();
+    });
+
+    document.getElementById('teamBColor').addEventListener('change', () => {
+      applyColors();
+      saveColors();
+    });
+
+    window.addEventListener('load', loadColors);
+  </script>
 </body>
 </html>
