@@ -6,6 +6,11 @@
   <title>Basketball Score</title>
 
   <style>
+    /* Wichtig: verhindert Überlaufen von Elementen */
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       background: #111;
@@ -30,7 +35,9 @@
       padding: 8px;
       width: 100%;
       text-align: center;
-      margin-bottom: 6px;
+      margin: 6px 0;
+      border-radius: 10px;
+      border: none;
     }
 
     input[type="color"] {
