@@ -6,10 +6,7 @@
   <title>Basketball Score</title>
 
   <style>
-    /* Wichtig: verhindert Überlaufen von Elementen */
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -20,8 +17,55 @@
       text-align: center;
     }
 
-    h1 {
-      margin-bottom: 8px;
+    h1 { margin: 8px 0 12px; }
+
+    .topBar {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .timerBox {
+      background: #1c1c1c;
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .timerDisplay {
+      font-size: 56px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin: 6px 0 10px;
+    }
+
+    .timerControls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .timerInputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-size: 13px;
+      opacity: 0.85;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="number"], input[type="text"] {
+      font-size: 18px;
+      padding: 10px;
+      width: 100%;
+      text-align: center;
+      border-radius: 10px;
+      border: none;
     }
 
     .teams {
@@ -30,22 +74,12 @@
       gap: 16px;
     }
 
-    input[type="text"] {
-      font-size: 18px;
-      padding: 8px;
-      width: 100%;
-      text-align: center;
-      margin: 6px 0;
-      border-radius: 10px;
-      border: none;
-    }
-
     input[type="color"] {
       width: 100%;
       height: 44px;
       border: none;
       border-radius: 10px;
-      margin-bottom: 8px;
+      margin: 6px 0 10px;
     }
 
     .teamBox {
@@ -62,23 +96,30 @@
     }
 
     button {
-      font-size: 22px;
-      padding: 16px;
+      font-size: 20px;
+      padding: 14px;
       margin: 6px 0;
       width: 100%;
       border: none;
       border-radius: 12px;
       background: #2ecc71;
       color: black;
-      font-weight: bold;
+      font-weight: 800;
     }
 
-    .minus {
-      background: #e74c3c;
-    }
+    .minus { background: #e74c3c; }
+    .secondary { background: #f1c40f; }
+    .neutral { background: #bdc3c7; }
 
     .controls {
       margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 900px) {
+      .topBar { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -86,6 +127,34 @@
 <body>
   <h1>🏀 Score</h1>
 
+  <!-- TIMER -->
+  <div class="topBar">
+    <div class="timerBox">
+      <div class="timerInputs">
+        <div>
+          <label for="setMin">Minuten</label>
+          <input id="setMin" type="number" min="0" max="99" value="10" />
+        </div>
+        <div>
+          <label for="setSec">Sekunden</label>
+          <input id="setSec" type="number" min="0" max="59" value="0" />
+        </div>
+      </div>
+
+      <div class="timerDisplay" id="timerDisplay">10:00</div>
+
+      <div class="timerControls">
+        <button class="secondary" onclick="startPauseTimer()" id="startPauseBtn">Start</button>
+        <button class="neutral" onclick="applySetTime()">Set</button>
+        <button class="minus" onclick="resetTimer()">Reset</button>
+      </div>
+      <p style="margin:10px 0 0; opacity:.75; font-size: 13px;">
+        Tipp: „Set“ übernimmt Minuten/Sekunden. Start pausiert/fortsetzt.
+      </p>
+    </div>
+  </div>
+
+  <!-- TEAMS -->
   <div class="teams">
     <!-- TEAM A -->
     <div id="teamABox" class="teamBox">
@@ -115,10 +184,13 @@
   </div>
 
   <div class="controls">
-    <button onclick="reset()">Reset</button>
+    <button onclick="resetScores()">Reset Score</button>
   </div>
 
   <script>
+    // ---------------------------
+    // SCORE
+    // ---------------------------
     let scoreA = 0;
     let scoreB = 0;
 
@@ -132,13 +204,16 @@
       }
     }
 
-    function reset() {
+    function resetScores() {
       scoreA = 0;
       scoreB = 0;
       document.getElementById('scoreA').innerText = 0;
       document.getElementById('scoreB').innerText = 0;
     }
 
+    // ---------------------------
+    // TEAM COLORS (border)
+    // ---------------------------
     function applyColors() {
       const aColor = document.getElementById('teamAColor').value;
       const bColor = document.getElementById('teamBColor').value;
@@ -172,7 +247,114 @@
       saveColors();
     });
 
-    window.addEventListener('load', loadColors);
+    // ---------------------------
+    // TIMER (COUNTDOWN)
+    // ---------------------------
+    let timerTotalSeconds = 10 * 60;      // current remaining
+    let timerInitialSeconds = 10 * 60;    // set/reset value
+    let timerInterval = null;
+    let timerRunning = false;
+
+    function formatTime(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById('timerDisplay').innerText = formatTime(timerTotalSeconds);
+    }
+
+    function clampInt(v, min, max) {
+      v = parseInt(v, 10);
+      if (isNaN(v)) v = min;
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function applySetTime() {
+      // stop if running
+      stopTimer();
+
+      const mins = clampInt(document.getElementById('setMin').value, 0, 99);
+      const secs = clampInt(document.getElementById('setSec').value, 0, 59);
+
+      timerInitialSeconds = mins * 60 + secs;
+      timerTotalSeconds = timerInitialSeconds;
+
+      localStorage.setItem('timerMin', mins);
+      localStorage.setItem('timerSec', secs);
+
+      updateTimerDisplay();
+      setStartPauseLabel();
+    }
+
+    function setStartPauseLabel() {
+      document.getElementById('startPauseBtn').innerText = timerRunning ? "Pause" : "Start";
+    }
+
+    function tick() {
+      if (timerTotalSeconds > 0) {
+        timerTotalSeconds -= 1;
+        updateTimerDisplay();
+      } else {
+        // finished
+        stopTimer();
+        // small vibration if supported
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      }
+    }
+
+    function startPauseTimer() {
+      if (timerRunning) {
+        stopTimer();
+      } else {
+        if (timerTotalSeconds <= 0) {
+          // if already at 0, reset to initial first
+          timerTotalSeconds = timerInitialSeconds;
+          updateTimerDisplay();
+        }
+        timerRunning = true;
+        setStartPauseLabel();
+        timerInterval = setInterval(tick, 1000);
+      }
+    }
+
+    function stopTimer() {
+      timerRunning = false;
+      setStartPauseLabel();
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    function resetTimer() {
+      stopTimer();
+      timerTotalSeconds = timerInitialSeconds;
+      updateTimerDisplay();
+    }
+
+    function loadTimer() {
+      const mins = localStorage.getItem('timerMin');
+      const secs = localStorage.getItem('timerSec');
+
+      if (mins !== null && secs !== null) {
+        const m = clampInt(mins, 0, 99);
+        const s = clampInt(secs, 0, 59);
+        document.getElementById('setMin').value = m;
+        document.getElementById('setSec').value = s;
+        timerInitialSeconds = m * 60 + s;
+        timerTotalSeconds = timerInitialSeconds;
+      }
+      updateTimerDisplay();
+      setStartPauseLabel();
+    }
+
+    // INIT
+    window.addEventListener('load', () => {
+      loadColors();
+      loadTimer();
+    });
   </script>
 </body>
 </html>
