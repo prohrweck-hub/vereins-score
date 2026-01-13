@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basketball Score</title>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #111;
+      color: white;
+      margin: 0;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .teams {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    input {
+      font-size: 18px;
+      padding: 8px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .score {
+      font-size: 96px;
+      font-weight: 900;
+      margin: 12px 0;
+    }
+
+    button {
+      font-size: 22px;
+      padding: 16px;
+      margin: 6px 0;
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      background: #2ecc71;
+      color: black;
+      font-weight: bold;
+    }
+
+    .minus {
+      background: #e74c3c;
+    }
+
+    .controls {
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🏀 Score</h1>
+
+  <div class="teams">
+    <div>
+      <input id="teamAName" placeholder="Team A" />
+      <div class="score" id="scoreA">0</div>
+      <button onclick="add('A',1)">+1</button>
+      <button onclick="add('A',2)">+2</button>
+      <button onclick="add('A',3)">+3</button>
+      <button class="minus" onclick="add('A',-1)">−1</button>
+    </div>
+
+    <div>
+      <input id="teamBName" placeholder="Team B" />
+      <div class="score" id="scoreB">0</div>
+      <button onclick="add('B',1)">+1</button>
+      <button onclick="add('B',2)">+2</button>
+      <button onclick="add('B',3)">+3</button>
+      <button class="minus" onclick="add('B',-1)">−1</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="reset()">Reset</button>
+  </div>
+
+  <script>
+    let scoreA = 0;
+    let scoreB = 0;
+
+    function add(team, value) {
+      if (team === 'A') {
+        scoreA = Math.max(0, scoreA + value);
+        document.getElementById('scoreA').innerText = scoreA;
+      } else {
+        scoreB = Math.max(0, scoreB + value);
+        document.getElementById('scoreB').innerText = scoreB;
+      }
+    }
+
+    function reset() {
+      scoreA = 0;
+      scoreB = 0;
+      document.getElementById('scoreA').innerText = 0;
+      document.getElementById('scoreB').innerText = 0;
+    }
+  </script>
+
+</body>
+</html>
